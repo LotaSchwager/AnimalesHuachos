@@ -13,7 +13,7 @@ docker pull mysql:latest
 
 De aqui en adelante solo utilice la terminal.
 
-## Para crear un contenedor de mysql
+## Para crear un contenedor de MySQL
 
 Utiliza este comando en el terminal:
 ```shell
@@ -50,7 +50,7 @@ CREATE TABLE tb_persona (
 INSERT INTO tb_persona (name, age) VALUES ('Ademir Munoz', 26), ('Nestor Retamal', 27);
 ```
 
-## Para conectarlo con Java
+## Dependencias de MySQL en Java
 
 En este caso tendran que añadir una dependencia dentro del proyecto de eclipse, para esto deben:
 
