@@ -77,3 +77,15 @@ Método ```GET```, esta entrega una lista con todos los animales en adopción.
 ```shell
 https://huachitos.cl/api/animales
 ```
+
+## Dependencias de la API en Java
+
+(Es lo mismo que la vez anterior solo que con otros .jar)
+En este caso tendran que añadir una dependencia dentro del proyecto de eclipse, para esto deben:
+
+1. Apretar clic derecho dentro del árbol de carpetas del proyecto, sobre la carpeta que dice ```Tarea1_template```
+2. Ir a la opción que dice ```Build Path -> Configure Build Path```
+3. Ir a la opción que dice ```Libraries```
+4. Seleccionar ```Modulepath``` y apretar ```Add_JARs...```
+5. Buscar por ```jackson-annotations-2.14.0``` ```jackson-core-2.14.0``` ```jackson-databind-2.14.0```
+6. Apply and Close, con eso debería funcionar
