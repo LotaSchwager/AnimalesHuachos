@@ -8,37 +8,20 @@ import java.util.ArrayList;
 
 import common.InterfazDeServer;
 import common.Persona;
-import common.Animal;
 
 public class Client {
+	
+	// ServerImpl
 	private InterfazDeServer server;
+	
+	// Sesion token
+	private String sessionToken = null;
+	
 	public Client() {};
 	
 	public void startClient() throws RemoteException, NotBoundException{
 		Registry registry = LocateRegistry.getRegistry("localhost",1009);
 		setServer((InterfazDeServer) registry.lookup("server"));
-	}
-	
-	public void mostrarPersonas() throws RemoteException {
-		ArrayList<Persona> personas = getServer().getPersona();	
-		System.out.println("\nPersonas dentro de la lista");
-		System.out.println("========================");
-		for(int i = 0; i < personas.size(); i++) 
-		{
-			System.out.println(i + " " + personas.get(i).getNombre() + " " + personas.get(i).getEdad());
-		}
-		System.out.println("========================\n");
-	}
-	
-	public void mostrarAnimales() throws RemoteException{
-		ArrayList<Animal> animales = getServer().getAnimal();
-		System.out.println("\nAnimales en adopción");
-		System.out.println("========================");
-		for(int i = 0; i < animales.size(); i++) 
-		{
-			System.out.println(i + " " + animales.get(i).getNombre());
-		}
-		System.out.println("========================\n");
 	}
 
 	public InterfazDeServer getServer() {
@@ -48,4 +31,52 @@ public class Client {
 	public void setServer(InterfazDeServer server) {
 		this.server = server;
 	}
+	
+	// ---  Funciones del servidor en accion ---
+
+    /**
+     * Llama al método remoto para iniciar sesión.
+     * Almacena el token si es exitoso.
+     * @return true si el login fue exitoso (se obtuvo un token), false en caso contrario.
+     */
+    public boolean login(String nickname, String password) throws RemoteException {
+        System.out.println("Cliente: Intentando iniciar sesión con " + nickname);
+        this.sessionToken = getServer().iniciarSesion(nickname, password);
+        return this.sessionToken != null;
+    }
+
+    /**
+     * Llama al método remoto para crear una nueva cuenta.
+     * @return true si la cuenta fue creada con éxito, false si falla.
+     */
+    public boolean createAccount(String nickname, String name, String surname, String password) throws RemoteException {
+        System.out.println("Cliente: Intentando crear cuenta para " + nickname);
+        return getServer().crearCuenta(nickname, name, surname, password);
+    }
+
+     /**
+     * Llama al método remoto para mostrar la información de la cuenta logeada.
+     * Requiere pasar el token de sesión.
+     * @return El objeto Persona con los datos de la cuenta logeada.
+     */
+    public Persona mostrarCuenta() throws RemoteException {
+         if (this.sessionToken == null) {
+             throw new RemoteException("No hay sesión iniciada en el cliente.");
+         }
+         return getServer().mostrarCuenta(this.sessionToken);
+    }
+
+
+     /**
+     * Llama al método remoto para cerrar la sesión actual.
+     */
+    public void logout() throws RemoteException {
+        if (this.sessionToken != null) {
+             System.out.println("Cliente: Intentando cerrar sesión con token...");
+            getServer().cerrarSesion(this.sessionToken);
+            this.sessionToken = null;
+             System.out.println("Cliente: Token de sesión limpiado.");
+        }
+    }
+
 }

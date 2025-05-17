@@ -1,162 +1,144 @@
 package server;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import common.Animal;
 import common.InterfazDeServer;
+import common.Movie;
 import common.Persona;
+import common.Review;
 
 public class ServerImpl implements InterfazDeServer {
 	
-	private ArrayList<Animal> animales = new ArrayList<>();
-	private ArrayList <Persona> tb_persona = new ArrayList<>();
+	// Funciones
+	private DB_connector context;
+	private Api_connector api;
 	
-	// Conexión con mysql y docker
-	private String connectionURL = "jdbc:mysql://localhost:3307/bd_CPYD";
-	private String user = "root";
-	private String password = "1234";
+	// Sesiones activas
+	private Map<String, Persona> sesionesActivas;
 	
-	// Conexión con la api
-	private String url = "https://huachitos.cl/api/animales";
 	
+	// Funcion que inicializa el server
 	public ServerImpl() throws RemoteException {
 		UnicastRemoteObject.exportObject(this,0);
-		loadDB();
-		loadAPI();
-	}
-	
-	private void loadDB() {
-		
-        try (Connection connection = openConnection();) {
-        	Statement statement = connection.createStatement();
-        	ResultSet result = statement.executeQuery("SELECT * FROM tb_persona");
-        	
-        	while(result.next()) {
-        		String nombre = result.getString("name");
-        		int edad = result.getInt("age");
-        		
-        		Persona individuo = new Persona(nombre, edad);
-        		tb_persona.add(individuo);
-        	}
-        }
-        catch (SQLException e) {
-            e.printStackTrace();
-        }
+		this.context = new DB_connector();
+		this.api = new Api_connector();
+		this.sesionesActivas = new ConcurrentHashMap<>();
 	}
 
-	public void agregarPersona(String nombre, int edad) throws RemoteException {
-		try(Connection connection = openConnection();) {
-			String sql = "INSERT INTO tb_persona(name, age) VALUES (?,?)";
-			
-			PreparedStatement stmt = connection.prepareStatement(sql);
-			
-			stmt.setString(1, nombre);
-			stmt.setInt(2, edad);
-			stmt.executeUpdate();
-			
-			Persona persona = new Persona(nombre, edad);
-			tb_persona.add(persona);
-		}
-		catch(SQLException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public void loadAPI() {
-		HttpClient client = HttpClient.newHttpClient();
-		HttpRequest request = HttpRequest.newBuilder().uri(URI.create(this.url)).GET().build();
-		
+	@Override
+	public String iniciarSesion(String nickname, String password) throws RemoteException {
+		System.out.println("Intento de Login: " + nickname);
 		try {
-			HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-			
-			if(response.statusCode() == 200) {
-				
-				ObjectMapper mapper = new ObjectMapper();
-				JsonNode root = mapper.readTree(response.body());
-				JsonNode dataArray = root.get("data");
+            // Usar el DB_connector para validar credenciales en la BD
+            Persona personaLogeada = context.validarCredenciales(nickname, password);
 
-				for (JsonNode a : dataArray) {
-				    int id = a.get("id").asInt();
-				    String nombre = a.get("nombre").asText();
-				    String tipo = a.get("tipo").asText();
-				    String edadStr = a.get("edad").asText();
-				    int edadInt = extraerEdadComoEntero(edadStr);
-				    String estado = a.get("estado").asText();
-				    String genero = a.get("genero").asText();
-				    String descFisica = a.get("desc_fisica").asText();
-				    String descPersonalidad = a.get("desc_personalidad").asText();
-				    String descAdicional = a.get("desc_adicional").asText();
-				    int esterilizado = a.get("esterilizado").asInt();
-				    int vacunas = a.get("vacunas").asInt();
-				    String imagen = a.get("imagen").asText();
-				    String equipo = a.get("equipo").asText();
-				    String region = a.get("region").asText();
-				    String comuna = a.get("comuna").asText();
-				    String url = this.url;
+            if (personaLogeada != null) {
+            	
+                 // Verificar si ya tiene una sesión activa y si quieres permitirla o invalidar la anterior
+            	// En proceso
 
-				    Animal animal = new Animal(id, nombre, tipo, edadStr, edadInt, estado, genero,
-				                                descFisica, descPersonalidad, descAdicional,
-				                                esterilizado, vacunas, imagen, equipo, region, comuna, url);
+                // Credenciales válidas: generar token, almacenar sesión y retornar token
+                String sessionToken = UUID.randomUUID().toString();
+                sesionesActivas.put(sessionToken, personaLogeada);
 
-				    animales.add(animal);
-				}
-				
-			}else {
-				System.out.println("Error: Código de estado HTTP " + response.statusCode());
-			}
-			
-		}catch(IOException | InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	@Override
-	public ArrayList<Persona> getPersona() throws RemoteException {
-		return this.tb_persona;
-	}
-	
-	@Override 
-	public ArrayList<Animal> getAnimal() throws RemoteException {
-		return this.animales;
+                System.out.println("Login exitoso para " + nickname + ". Token: " + sessionToken);
+                return sessionToken;
+            } else {
+                // Credenciales inválidas
+                System.out.println("Login fallido para " + nickname + ": Credenciales inválidas.");
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RemoteException("Error de base de datos durante el login", e);
+        }
 	}
 
 	@Override
-	public Persona Persona(String nombre, int edad) throws RemoteException {
+	public boolean crearCuenta(String nickname, String name, String surname, String password) throws RemoteException {
+		System.out.println("Intento de crear cuenta para: " + nickname);
+        try {
+            int idGenerado = context.crearPersonaEnBD(nickname, name, surname, password);
+
+            // Si se obtuvo un ID generado, la creación fue exitosa
+            if (idGenerado != -1) {
+                System.out.println("Cuenta creada con éxito para " + nickname + " (ID: " + idGenerado + ")");
+                
+                // Si quiero obtener la persona nueva se podria con esto, pero por ahora no se me ocurre un uso
+                // Persona nuevaPersona = context.getPersonaById(idGenerado);
+                // Algo .....
+                
+                return true;
+            } else {
+                System.out.println("Fallo al crear cuenta para " + nickname);
+                return false;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RemoteException("Error de base de datos al crear cuenta", e);
+        }
+	}
+
+	@Override
+	public void cerrarSesion(String sessionToken) throws RemoteException {
+		Persona persona = sesionesActivas.remove(sessionToken);
+        if (persona != null) {
+            System.out.println("Sesión cerrada para usuario: " + persona.getNickname());
+        } else {
+            System.out.println("Intento de cerrar sesión con token inválido.");
+        }
+	}
+
+	@Override
+	public Persona mostrarCuenta(String sessionToken) throws RemoteException {
+		System.out.println("Solicitud mostrarCuenta con token: " + sessionToken);
+        // Validar el token de sesión
+        Persona personaLogeada = validarTokenSesion(sessionToken);
+
+        // Si llegamos aquí, el token es válido y tenemos la Persona
+        System.out.println("Mostrando cuenta para usuario: " + personaLogeada.getNickname());
+
+        // Otra opcion
+        // return context.getPersonaById(personaLogeada.getId());
+        return personaLogeada;
+	}
+
+	@Override
+	public ArrayList<Movie> buscarPeliculas(String sessionToken, String criterioBusqueda) throws RemoteException {
 		// TODO Auto-generated method stub
-		Persona persona = new Persona(nombre,edad);
-		return persona;
+		return null;
+	}
+
+	@Override
+	public ArrayList<Movie> mostrarFavoritos(String sessionToken) throws RemoteException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ArrayList<Review> mostrarResenasPersonales(String sessionToken) throws RemoteException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
-	// Entrar a la conexion de mysql
-	private Connection openConnection() throws SQLException {
-	    return DriverManager.getConnection(this.connectionURL, this.user, this.password);
-	}
+	// Utilidad
+	private Persona validarTokenSesion(String sessionToken) throws RemoteException {
+        if (sessionToken == null || sessionToken == "") {
+             throw new RemoteException("Acceso denegado: No se proporcionó token de sesión.");
+        }
+       Persona persona = sesionesActivas.get(sessionToken);
+       if (persona == null) {
+           // Token no encontrado o sesión expirada
+           throw new RemoteException("Sesión inválida o expirada. Por favor, inicie sesión de nuevo.");
+       }
+       // Token válido, retorna la Persona asociada
+       return persona; 
+   }
 	
-	// extraer el numero dentro del json
-	private int extraerEdadComoEntero(String edadStr) {
-	    Pattern p = Pattern.compile("\\d+");
-	    Matcher m = p.matcher(edadStr);
-	    if (m.find()) {
-	        return Integer.parseInt(m.group());
-	    }
-	    return -1;
-	}
+	
 }
