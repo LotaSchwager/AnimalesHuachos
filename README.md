@@ -1,4 +1,4 @@
-# AnimalesHuachos
+# Proyecto en Java RMI
 Proyecto de ICI4344-1 "Computación paralela y distribuida" hecho en Java RMI, junto a una base de datos en MySQL ejecutándose en Docker.
 
 # Utilizando Docker
@@ -69,13 +69,13 @@ private String password = "1234";
 ```
 
 # API
-Esta es la página de la [API](https://huachitos.cl/nosotros), esta tiene información sobre animales en adopción.
+Esta es la página de la [API](https://developer.themoviedb.org/reference/intro/getting-started), esta tiene información sobre peliculas.
 
 Endpoints en uso por ahora:
 
-Método ```GET```, esta entrega una lista con todos los animales en adopción.
+En construcción
 ```shell
-https://huachitos.cl/api/animales
+En proceso
 ```
 
 ## Dependencias de la API en Java
