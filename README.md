@@ -6,7 +6,7 @@ Descargar primero [Docker Desktop](https://www.docker.com/products/docker-deskto
 La única diferencia entre ellos dos es que uno es para utilizar en terminal y el otro tiene interfaz gráfica, pero son en sí lo mismo.
 
 En la versión de desktop, busca en Docker hub, busca MySQL y pon el primero que sale de la búsqueda y en la parte superior derecha selecciona la opción ```pull```.
-En la versión de terminal coloca el siguiente comando:
+En la versión de terminal coloca el siguiente comando, recordar que en Linux usar ```sudo``` antes de cada comando:
 ```shell
 docker pull mysql:latest
 ```
@@ -39,15 +39,59 @@ Para crear una base de datos
 CREATE DATABASE bd_CPYD;
 ```
 
-Para crear la tabla de personas que utiliza el código en java:
+Una vez dentro, usar la base de datos creada
+```sql
+USE bd_CPYD;
+```
+
+Para crear la tabla de personas, peliculas y reviews que utiliza el código en java:
 ```sql
 CREATE TABLE tb_persona (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    age INT
+    nickname VARCHAR(100) NOT NULL UNIQUE,
+    name VARCHAR(150) NOT NULL,
+    surname VARCHAR(150) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
-
-INSERT INTO tb_persona (name, age) VALUES ('Ademir Munoz', 26), ('Nestor Retamal', 27);
+```
+```sql
+CREATE TABLE tb_movie (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(255) NOT NULL,
+    adult BOOLEAN DEFAULT FALSE,
+    original_lang VARCHAR(10),
+    description TEXT,
+    popularity FLOAT DEFAULT 0.0,
+    release_date DATE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+```
+```sql
+CREATE TABLE tb_persona_favorite_movie (
+    persona_id INT NOT NULL,
+    movie_id INT NOT NULL,
+    favorited_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (persona_id, movie_id),
+    FOREIGN KEY (persona_id) REFERENCES tb_persona(id) ON DELETE CASCADE,
+    FOREIGN KEY (movie_id) REFERENCES tb_movie(id) ON DELETE CASCADE
+);
+```
+```sql
+CREATE TABLE tb_review (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    movie_id INT NOT NULL,
+    persona_id INT NOT NULL,
+    review_text TEXT NOT NULL,
+    rating TINYINT UNSIGNED,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (movie_id) REFERENCES tb_movie(id) ON DELETE CASCADE,
+    FOREIGN KEY (persona_id) REFERENCES tb_persona(id) ON DELETE CASCADE,
+    UNIQUE KEY uq_persona_movie_review (persona_id, movie_id)
+);
 ```
 
 ## Dependencias de MySQL en Java
