@@ -14,7 +14,6 @@ import java.util.List;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-
 public class Api_connector {
 	
 	// Conexión con la api
@@ -22,7 +21,6 @@ public class Api_connector {
 	private String genre_list = "https://api.themoviedb.org/3/genre/movie/list?language=es";
 	private String movie_list = "https://api.themoviedb.org/3/discover/movie?include_adult=false&include_video=false&language=es&page=1";
 	private String movie_get = "https://api.themoviedb.org/3/movie/2?language=es";
-	
 	
 	// Credenciales de la api
 	private ArrayList<String> header_accept = new ArrayList<>(List.of("accept", "application/json"));
@@ -50,7 +48,8 @@ public class Api_connector {
 			System.out.println(e);
 		}
 	}
-		
+	
+	// Funcion para obtener una lista de generos
 	public void get_Genre_List() {
 		try {
 			HttpRequest request = HttpRequest.newBuilder()
@@ -119,7 +118,6 @@ public class Api_connector {
 	}
 	*/
 	
-	
 	// Utilidad
 	// extraer el numero dentro del json
 	/*
@@ -131,5 +129,4 @@ public class Api_connector {
 	    }
 	    return -1;
 	}*/
-
 }

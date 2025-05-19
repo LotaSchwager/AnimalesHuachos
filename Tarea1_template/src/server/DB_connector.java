@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -36,7 +37,9 @@ public class DB_connector {
 	 */
 	public Persona validarCredenciales(String nickname, String password) throws SQLException {
 	
-		String sql = "SELECT id, nickname, name, surname, password FROM tb_persona WHERE nickname = ? AND password = ?";
+		String sql = "SELECT id, name, surname, created_at, updated_at FROM tb_persona WHERE nickname = ? AND password_hash = ?";
+		
+		//System.out.print("Nickname: " + nickname + " password_hash: " + password);
 	
 		try (Connection connection = openConnection();
 	         PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -51,8 +54,10 @@ public class DB_connector {
 					int id = result.getInt("id");
 					String name = result.getString("name");
 					String surname = result.getString("surname");
+                    Timestamp createdAtTime = result.getTimestamp("created_at");
+                    Timestamp updatedAtTime = result.getTimestamp("updated_at");
 	
-					return new Persona(id, nickname, name, surname, password);
+					return new Persona(id, nickname, name, surname, password, createdAtTime.toLocalDateTime(), updatedAtTime.toLocalDateTime());
 				}
 			}
 		}catch(SQLException e) {
@@ -71,7 +76,7 @@ public class DB_connector {
      * @throws SQLException Si ocurre un error de base de datos.
      */
 	public Persona getPersonaById(int id) throws SQLException {
-		String sql = "SELECT id, nickname, name, surname, password FROM tb_persona WHERE id = ?";
+		String sql = "SELECT id, nickname, name, surname, password_hash FROM tb_persona WHERE id = ?";
 	    try (Connection connection = openConnection();
 	          PreparedStatement stmt = connection.prepareStatement(sql)) {
 	         stmt.setInt(1, id);
@@ -80,8 +85,11 @@ public class DB_connector {
 	                 String dbNickname = result.getString("nickname");
 	                 String dbName = result.getString("name");
 	                 String dbSurname = result.getString("surname");
-	                 String dbPassword = result.getString("password");
-	                 return new Persona(id, dbNickname, dbName, dbSurname, dbPassword);
+	                 String dbPassword = result.getString("password_hash");
+	                 Timestamp createdAtTime = result.getTimestamp("created_at");
+	                 Timestamp updatedAtTime = result.getTimestamp("updated_at");
+		
+	                 return new Persona(id, dbNickname, dbName, dbSurname, password, createdAtTime.toLocalDateTime(), updatedAtTime.toLocalDateTime());
 	             }
 	        }
 	    }
@@ -112,7 +120,7 @@ public class DB_connector {
 	        return -1;
 	    }
 
-	    String sql = "INSERT INTO tb_persona(nickname, name, surname, password) VALUES (?,?,?,?)";
+	    String sql = "INSERT INTO tb_persona(nickname, name, surname, password_hash) VALUES (?,?,?,?)";
 
 	    try (Connection connection = openConnection();
 	         PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -120,7 +128,7 @@ public class DB_connector {
 	        stmt.setString(1, nickname);
 	        stmt.setString(2, name);
 	        stmt.setString(3, surname);
-	        stmt.setString(4, password); // Deberías insertar el hash del password aquí
+	        stmt.setString(4, password);
 
 	        // Deberá entregar la cantidad de filas agregadas que debería ser uno.
 	        int filaAfectada = stmt.executeUpdate();
@@ -130,11 +138,11 @@ public class DB_connector {
 	            try (ResultSet rs = stmt.getGeneratedKeys()) {
 	                if (rs.next()) {
 	                    // Recupera el ID
-	                    idGenerado = rs.getInt(1); // O getLong(1) si es BIGINT
+	                    idGenerado = rs.getInt(1);
 	                    System.out.println("Persona insertada con ID: " + idGenerado);
 	                } else {
 	                    System.err.println("Error: No se obtuvo ID generado para la inserción.");
-	                    idGenerado = -1; // Asegurarnos de que el ID es -1 si no se obtiene
+	                    idGenerado = -1;
 	                }
 	            }
 	        } else {

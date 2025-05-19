@@ -20,8 +20,8 @@ public class Client {
 	public Client() {};
 	
 	public void startClient() throws RemoteException, NotBoundException{
-		Registry registry = LocateRegistry.getRegistry("localhost",1009);
-		setServer((InterfazDeServer) registry.lookup("server"));
+		Registry registry = LocateRegistry.getRegistry("localhost",2020);
+		setServer((InterfazDeServer) registry.lookup("servidor"));
 	}
 
 	public InterfazDeServer getServer() {
