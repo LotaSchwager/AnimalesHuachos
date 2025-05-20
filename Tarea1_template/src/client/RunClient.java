@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+import common.Movie;
 import common.Persona;
 // import common.Movie; // Descomenta cuando implementes la lógica de Movie
 // import common.Review; // Descomenta cuando implementes la lógica de Review
@@ -327,45 +328,47 @@ public class RunClient {
         System.out.println("==================================");
     }
 
+    
+    //Permite buscar usando los filtros opcionales genero, año y puntuacion minima
+    //Ej -g Action -y 2020 -r 80
     private static void handleSearch(List<String> args, Client client) {
-        // Ejemplo de parseo de flags para 'search -g accion terror -y 2020'
-        // Esto es un parseador simple, se puede hacer más robusto.
-        List<String> genres = new ArrayList<>();
-        String year = null;
+        String genero = null;
+        int anio = -1;
+        float rating = -1;
 
-        for (int i = 0; i < args.size(); i++) {
-            String arg = args.get(i);
-            if (arg.equals("-g")) { // Flag de género
-                i++; // El siguiente argumento es el primer género
-                while (i < args.size() && !args.get(i).startsWith("-")) {
-                    genres.add(args.get(i));
-                    i++;
-                }
-                if (genres.isEmpty()){
-                    System.out.println("Error: El flag -g requiere al menos un género.");
-                    return;
-                }
-                i--; // Retroceder un índice porque el bucle for externo incrementará
-            } else if (arg.equals("-y")) { // Flag de año
-                if (i + 1 < args.size() && !args.get(i+1).startsWith("-")) {
-                    year = args.get(i + 1);
-                    i++; // Consumir el valor del año
-                } else {
-                    System.out.println("Error: El flag -y requiere un valor de año.");
-                    return;
-                }
-            } else {
-                System.out.println("Flag desconocido o argumento inesperado para search: " + arg);
-                return;
+        //Procesamiento de las flags
+        for (int i = 0; i < args.size() - 1; i++) {
+            switch (args.get(i)) {
+                case "-g":
+                    genero = args.get(i + 1);
+                    break;
+                case "-y":
+                    anio = Integer.parseInt(args.get(i + 1));
+                    break;
+                case "-r":
+                    rating = Float.parseFloat(args.get(i + 1));
+                    break;
             }
         }
 
-        System.out.println("Activaste este comando: search");
-        System.out.println("Géneros a buscar: " + (genres.isEmpty() ? "Cualquiera" : genres));
-        System.out.println("Año a buscar: " + (year == null ? "Cualquiera" : year));
-        System.out.println("(Funcionalidad de búsqueda real pendiente)");
-        // Aquí llamarías a client.searchMovies(genres, year);
+        try {
+            List<Movie> resultados = client.buscarPeliculas(client.getSessionToken(), genero, anio, rating);
+
+            if (resultados.isEmpty()) {
+                System.out.println("No se encontraron películas con esos filtros.");
+            } else {
+                System.out.println("Películas encontradas:");
+                for (Movie m : resultados) {
+                    System.out.println("- " + m.getNombre() + " | Pop: " + m.getPopularity());
+                }
+            }
+
+        } catch (RemoteException e) {
+            System.out.println("Error al buscar películas: " + e.getMessage());
+        }
     }
+
+
 
     private static void handleMakeReview(int movieId, Scanner sc, Client client) {
         clean();

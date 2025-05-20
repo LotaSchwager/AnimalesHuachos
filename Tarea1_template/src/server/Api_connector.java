@@ -14,12 +14,15 @@ import java.util.List;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import common.Genre;
+import common.Movie;
+
 public class Api_connector {
 	
 	// Conexión con la api
 	private String auth_url = "https://api.themoviedb.org/3/authentication";
 	private String genre_list = "https://api.themoviedb.org/3/genre/movie/list?language=es";
-	private String movie_list = "https://api.themoviedb.org/3/discover/movie?include_adult=false&include_video=false&language=es&page=1";
+	private String movie_list = "https://api.themoviedb.org/3/discover/movie?include_adult=false&include_video=false&language=es";
 	private String movie_get = "https://api.themoviedb.org/3/movie/2?language=es";
 	
 	// Credenciales de la api
@@ -65,6 +68,108 @@ public class Api_connector {
 			System.out.println(e);
 		}
 	}
+	
+	//Funcion que busca las peliculas segun los filtros
+	//Busca entre la pagina 1 y pagina 3
+	//Crea el url de forma dinamica dependiendo de los filtros
+	public List<Movie> getMovieList(String genreId, int year, float ratingMin) {
+	    List<Movie> movies = new ArrayList<>();
+
+	    int totalPages = 1;
+	    int maxPages = 3; // puedes subirlo si quieres más resultados
+
+	    try {
+	        for (int page = 1; page <= totalPages && page <= maxPages; page++) {
+	            // Construir URL con filtros
+	            StringBuilder urlBuilder = new StringBuilder("https://api.themoviedb.org/3/discover/movie?");
+	            urlBuilder.append("include_adult=false");
+	            urlBuilder.append("&include_video=false");
+	            urlBuilder.append("&language=es");
+	            urlBuilder.append("&page=").append(page);
+
+	            if (genreId != null && !genreId.isEmpty()) {
+	                urlBuilder.append("&with_genres=").append(genreId);
+	            }
+	            if (year != -1) {
+	                urlBuilder.append("&year=").append(year);
+	            }
+	            if (ratingMin != -1) {
+	                urlBuilder.append("&vote_average.gte=").append(ratingMin);
+	            }
+
+	            HttpRequest request = HttpRequest.newBuilder()
+	                    .uri(URI.create(urlBuilder.toString()))
+	                    .header(header_accept.get(0), header_accept.get(1))
+	                    .header(header_auth.get(0), header_auth.get(1))
+	                    .GET()
+	                    .build();
+
+	            HttpResponse<String> response = HttpClient.newHttpClient()
+	                    .send(request, HttpResponse.BodyHandlers.ofString());
+
+	            ObjectMapper mapper = new ObjectMapper();
+	            JsonNode root = mapper.readTree(response.body());
+
+	            if (page == 1 && root.has("total_pages")) {
+	                totalPages = root.get("total_pages").asInt(); // actualiza para próximas páginas
+	            }
+
+	            JsonNode results = root.get("results");
+	            for (JsonNode m : results) {
+	                int id = m.get("id").asInt();
+	                String title = m.get("title").asText();
+	                boolean adult = m.get("adult").asBoolean();
+	                String lang = m.get("original_language").asText();
+	                String description = m.get("overview").asText();
+	                float popularity = (float) m.get("popularity").asDouble();
+	                String releaseDate = m.has("release_date") ? m.get("release_date").asText() : "0000-00-00";
+
+	                List<Genre> genres = new ArrayList<>();
+	                JsonNode genreIds = m.get("genre_ids");
+	                if (genreIds != null && genreIds.isArray()) {
+	                    for (JsonNode g : genreIds) {
+	                        int gid = g.asInt();
+	                        genres.add(new Genre(gid, obtenerNombreGenero(gid)));
+	                    }
+	                }
+
+	                movies.add(new Movie(id, title, adult, new ArrayList<>(genres), lang, description, popularity, releaseDate));
+	            }
+	        }
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return movies;
+	}
+
+
+	private String obtenerNombreGenero(int id) {
+	    return switch (id) {
+	        case 28 -> "Action";
+	        case 12 -> "Adventure";
+	        case 16 -> "Animation";
+	        case 35 -> "Comedy";
+	        case 80 -> "Crime";
+	        case 99 -> "Documentary";
+	        case 18 -> "Drama";
+	        case 10751 -> "Family";
+	        case 14 -> "Fantasy";
+	        case 36 -> "History";
+	        case 27 -> "Horror";
+	        case 10402 -> "Music";
+	        case 9648 -> "Mystery";
+	        case 10749 -> "Romance";
+	        case 878 -> "Science Fiction";
+	        case 10770 -> "TV Movie";
+	        case 53 -> "Thriller";
+	        case 10752 -> "War";
+	        case 37 -> "Western";
+	        default -> "Unknown";
+	    };
+	}
+
 	
 	// Funcion para obtener una lista de peliculas.
 	

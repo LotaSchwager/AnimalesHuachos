@@ -7,6 +7,7 @@ import java.rmi.registry.Registry;
 import java.util.ArrayList;
 
 import common.InterfazDeServer;
+import common.Movie;
 import common.Persona;
 
 public class Client {
@@ -20,7 +21,7 @@ public class Client {
 	public Client() {};
 	
 	public void startClient() throws RemoteException, NotBoundException{
-		Registry registry = LocateRegistry.getRegistry("localhost",2020);
+		Registry registry = LocateRegistry.getRegistry("localhost",1017);
 		setServer((InterfazDeServer) registry.lookup("servidor"));
 	}
 
@@ -30,6 +31,10 @@ public class Client {
 
 	public void setServer(InterfazDeServer server) {
 		this.server = server;
+	}
+	
+	public String getSessionToken(){
+		return sessionToken;
 	}
 	
 	// ---  Funciones del servidor en accion ---
@@ -77,6 +82,10 @@ public class Client {
             this.sessionToken = null;
              System.out.println("Cliente: Token de sesión limpiado.");
         }
+    }
+    
+    public ArrayList<Movie> buscarPeliculas(String token, String genero, int anio, float rating) throws RemoteException {
+        return server.buscarPeliculas(token, genero, anio, rating);
     }
 
 }

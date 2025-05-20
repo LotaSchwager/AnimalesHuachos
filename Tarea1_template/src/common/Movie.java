@@ -1,9 +1,15 @@
 package common;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Movie {
+//Serializable porque usamos rmi
+public class Movie implements Serializable{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private int id;
 	private String nombre;
 	private boolean adult;
@@ -13,7 +19,7 @@ public class Movie {
 	private float popularity;
 	private String release_date;
 	
-	Movie(int id, String nombre, boolean adult, ArrayList<Genre> genres, String og_lang, String dscp, float popularity, String release){
+	public Movie(int id, String nombre, boolean adult, ArrayList<Genre> genres, String og_lang, String dscp, float popularity, String release){
 		this.id = id;
 		this.nombre = nombre;
 		this.adult = adult;
