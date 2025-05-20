@@ -9,7 +9,7 @@ public interface InterfazDeServer extends Remote {
 	public boolean crearCuenta(String nickname, String name, String surname, String password) throws RemoteException;
 	public void cerrarSesion(String sessionToken) throws RemoteException;
 	public Persona mostrarCuenta(String sessionToken) throws RemoteException;
-	public ArrayList<Movie> buscarPeliculas(String sessionToken, String criterioBusqueda) throws RemoteException;
+	public ArrayList<Movie> buscarPeliculas(String sessionToken, String genero, int anio, float rating) throws RemoteException;
     public ArrayList<Movie> mostrarFavoritos(String sessionToken) throws RemoteException;
     public ArrayList<Review> mostrarResenasPersonales(String sessionToken) throws RemoteException;
 }

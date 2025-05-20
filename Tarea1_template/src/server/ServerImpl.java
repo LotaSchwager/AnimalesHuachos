@@ -109,10 +109,19 @@ public class ServerImpl implements InterfazDeServer {
 	}
 
 	@Override
-	public ArrayList<Movie> buscarPeliculas(String sessionToken, String criterioBusqueda) throws RemoteException {
-		// TODO Auto-generated method stub
-		return null;
+	public ArrayList<Movie> buscarPeliculas(String sessiontoken, String genero, int anio, float rating) throws RemoteException {
+
+	    // Traduce el nombre del género (ej. "Action") a su ID (ej. "28")
+	    String genreId = convertirNombreAGeneroId(genero);
+
+	    // Llama a la API con los filtros
+	    Api_connector api = new Api_connector();
+	    ArrayList<Movie> resultados = (ArrayList<Movie>) api.getMovieList(genreId, anio, rating);
+
+	    return resultados;
 	}
+
+
 
 	@Override
 	public ArrayList<Movie> mostrarFavoritos(String sessionToken) throws RemoteException {
@@ -140,5 +149,35 @@ public class ServerImpl implements InterfazDeServer {
        return persona; 
    }
 	
+	//Conviernte el genero a su id
+	private String convertirNombreAGeneroId(String nombre) {
+	    if (nombre == null) return "";
+
+	    Map<String, String> mapa = Map.ofEntries(
+	    	    Map.entry("Action", "28"),
+	    	    Map.entry("Adventure", "12"),
+	    	    Map.entry("Animation", "16"),
+	    	    Map.entry("Comedy", "35"),
+	    	    Map.entry("Crime", "80"),
+	    	    Map.entry("Documentary", "99"),
+	    	    Map.entry("Drama", "18"),
+	    	    Map.entry("Family", "10751"),
+	    	    Map.entry("Fantasy", "14"),
+	    	    Map.entry("History", "36"),
+	    	    Map.entry("Horror", "27"),
+	    	    Map.entry("Music", "10402"),
+	    	    Map.entry("Mystery", "9648"),
+	    	    Map.entry("Romance", "10749"),
+	    	    Map.entry("Science Fiction", "878"),
+	    	    Map.entry("TV Movie", "10770"),
+	    	    Map.entry("Thriller", "53"),
+	    	    Map.entry("War", "10752"),
+	    	    Map.entry("Western", "37")
+	    	);
+
+
+	    return mapa.getOrDefault(nombre.trim(), ""); // Devuelve "" si no se reconoce el nombre
+	}
+
 	
 }
