@@ -21,7 +21,7 @@ public class Client {
 	public Client() {};
 	
 	public void startClient() throws RemoteException, NotBoundException{
-		Registry registry = LocateRegistry.getRegistry("localhost",1017);
+		Registry registry = LocateRegistry.getRegistry("localhost",1030);
 		setServer((InterfazDeServer) registry.lookup("servidor"));
 	}
 
@@ -84,8 +84,13 @@ public class Client {
         }
     }
     
+    // Llama al metodo para buscar peliculas
     public ArrayList<Movie> buscarPeliculas(String token, String genero, int anio, float rating) throws RemoteException {
         return server.buscarPeliculas(token, genero, anio, rating);
     }
-
+    
+    // LLama a editar persona
+    public Boolean[] editCuenta(String nombre, String apelldo, String nickname, int id) throws RemoteException {
+    	return server.editCuenta(nombre, apelldo, nickname, id);
+    }
 }

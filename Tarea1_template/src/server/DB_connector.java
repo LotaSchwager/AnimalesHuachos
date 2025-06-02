@@ -99,7 +99,7 @@ public class DB_connector {
 	
 	// ======================================================================================//
 	
-	// ============================== Crear ==================================================//
+	// ============================ Crear y Cambiar =========================================//
 	
      /**
       * Crea una nueva cuenta para una persona en la BASE DE DATOS.
@@ -157,6 +157,115 @@ public class DB_connector {
 	        throw e;
 	    }
 	 }
+	 
+ 	/**
+     * Cambiar una columna de Usuario
+     * @param nombre: El nuevo nombre a cambiar.
+     * @param id: El id del usuario.
+     * @return true si se realizo el cambio, false en caso contrario.
+     * @throws SQLException Si ocurre un error de base de datos.
+     */
+	 public boolean editName(String nombre, int id) {
+		 
+	    String sql = "UPDATE tb_persona SET name = ? WHERE id = ?";
+	    
+	    try (Connection connection = openConnection();
+		         PreparedStatement stmt = connection.prepareStatement(sql)) {
+
+		        stmt.setString(1, nombre);
+		        stmt.setInt(2, id);
+
+		        // Deberá entregar la cantidad de filas agregadas o modificadas, que debería ser uno.
+		        int filaAfectada = stmt.executeUpdate();
+
+		        // Verifica si al menos una fila fue añadida
+		        if (filaAfectada > 0) {
+		        	return true;
+		        } else {
+		            System.err.println("Error: La inserción en la base de datos falló (0 filas afectadas).");
+		            return false;
+		        }
+
+		    } catch (SQLException e) {
+		        e.printStackTrace();
+		        return false;
+		    }
+	 }
+	 
+ 	/**
+     * Cambiar una columna de Usuario
+     * @param apellido: El nuevo apellido a cambiar.
+     * @param id: El id del usuario.
+     * @return true si se realizo el cambio, false en caso contrario.
+     * @throws SQLException Si ocurre un error de base de datos.
+     */
+	 public boolean editSurname(String apellido, int id) {
+		 
+	    String sql = "UPDATE tb_persona SET surname = ? WHERE id = ?";
+	    
+	    try (Connection connection = openConnection();
+		         PreparedStatement stmt = connection.prepareStatement(sql)) {
+
+		        stmt.setString(1, apellido);
+		        stmt.setInt(2, id);
+
+		        // Deberá entregar la cantidad de filas agregadas o modificadas, que debería ser uno.
+		        int filaAfectada = stmt.executeUpdate();
+
+		        // Verifica si al menos una fila fue añadida
+		        if (filaAfectada > 0) {
+		        	return true;
+		        } else {
+		            System.err.println("Error: La inserción en la base de datos falló (0 filas afectadas).");
+		            return false;
+		        }
+
+		    } catch (SQLException e) {
+		        e.printStackTrace();
+		        return false;
+		    }
+	 }
+	 
+ 	/**
+     * Cambiar una columna de Usuario
+     * @param nickname: El nuevo nickname a cambiar.
+     * @param id: El id del usuario.
+     * @return true si se realizo el cambio, false en caso contrario.
+     * @throws SQLException Si ocurre un error de base de datos.
+     */
+	 public boolean editNickname(String nickname, int id) throws SQLException{
+		 
+		 // Verificar si existe el nickname
+	    if (nicknameExists(nickname)) {
+	        System.err.println("Error: El nickname '" + nickname + "' ya existe.");
+	        return false;
+	    }
+	    
+	    String sql = "UPDATE tb_persona SET nickname = ? WHERE id = ?";
+	    
+	    try (Connection connection = openConnection();
+		         PreparedStatement stmt = connection.prepareStatement(sql)) {
+
+		        stmt.setString(1, nickname);
+		        stmt.setInt(2, id);
+
+		        // Deberá entregar la cantidad de filas agregadas o modificadas, que debería ser uno.
+		        int filaAfectada = stmt.executeUpdate();
+
+		        // Verifica si al menos una fila fue añadida
+		        if (filaAfectada > 0) {
+		        	return true;
+		        } else {
+		            System.err.println("Error: La inserción en la base de datos falló (0 filas afectadas).");
+		            return false;
+		        }
+
+		    } catch (SQLException e) {
+		        e.printStackTrace();
+		        return false;
+		    }
+	 }
+	 
  	
  	/**
      * Verifica si un nickname ya existe en la base de datos.

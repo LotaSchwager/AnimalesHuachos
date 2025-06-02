@@ -83,6 +83,53 @@ public class ServerImpl implements InterfazDeServer {
             throw new RemoteException("Error de base de datos al crear cuenta", e);
         }
 	}
+	
+	@Override
+	public Boolean[] editCuenta(String nombre, String apellido, String nickname, int id) throws RemoteException {
+	    Boolean[] resultados = new Boolean[3]; // [nombre, apellido, nickname]
+
+	    if (nombre != null) {
+	        resultados[0] = context.editName(nombre, id);
+	        if (!resultados[0]) {
+	            System.err.println("Error al actualizar el nombre para el ID: " + id);
+	            resultados[0] = false;
+	        }
+	    } else {
+	        resultados[0] = false;
+	    }
+
+	    if (apellido != null) {
+	        resultados[1] = context.editSurname(apellido, id);
+	        if (!resultados[1]) {
+	            System.err.println("Error al actualizar el apellido para el ID: " + id);
+	            resultados[1] = false;
+	        }
+	    } else {
+	        resultados[1] = false;
+	    }
+
+	    if (nickname != null) {
+	        try {
+	        	resultados[2] = context.editNickname(nickname, id);
+		        if (!resultados[2]) {
+		            System.err.println("Error al actualizar el apellido para el ID: " + id);
+		            resultados[2] = false;
+		        }
+	        }catch(Exception e) 
+	        {
+	        	System.out.println("Error" + e);
+	        }
+	    } else {
+	        resultados[2] = false;
+	    }
+
+	    return resultados;
+	}
+
+	// Las funciones editNombre, editApellido y editNickname se mantienen igual
+	// (las definiciones que proporcionaste anteriormente)
+
+	// ... (resto de las funciones: openConnection, nicknameExists)
 
 	@Override
 	public void cerrarSesion(String sessionToken) throws RemoteException {
@@ -120,8 +167,6 @@ public class ServerImpl implements InterfazDeServer {
 
 	    return resultados;
 	}
-
-
 
 	@Override
 	public ArrayList<Movie> mostrarFavoritos(String sessionToken) throws RemoteException {

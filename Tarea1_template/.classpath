@@ -6,22 +6,22 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="resources/jackson-annotations-2.14.0.jar">
+	<classpathentry kind="lib" path="/home/dante/repositories/movie_java/resources/jackson-annotations-2.14.0.jar">
 		<attributes>
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="resources/jackson-core-2.14.0.jar">
+	<classpathentry kind="lib" path="/home/dante/repositories/movie_java/resources/jackson-core-2.14.0.jar">
 		<attributes>
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="resources/jackson-databind-2.14.0.jar">
+	<classpathentry kind="lib" path="/home/dante/repositories/movie_java/resources/jackson-databind-2.14.0.jar">
 		<attributes>
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="resources/mysql-connector-j-9.3.0.jar">
+	<classpathentry kind="lib" path="/home/dante/repositories/movie_java/resources/mysql-connector-j-8.3.0.jar">
 		<attributes>
 			<attribute name="module" value="true"/>
 		</attributes>
