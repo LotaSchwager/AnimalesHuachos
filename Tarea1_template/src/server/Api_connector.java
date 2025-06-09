@@ -23,7 +23,7 @@ public class Api_connector {
 	private String auth_url = "https://api.themoviedb.org/3/authentication";
 	private String genre_list = "https://api.themoviedb.org/3/genre/movie/list?language=es";
 	private String movie_list = "https://api.themoviedb.org/3/discover/movie?include_adult=false&include_video=false&language=es";
-	private String movie_get = "https://api.themoviedb.org/3/movie/2?language=es";
+	private String movie_get = "https://api.themoviedb.org/3/movie/";
 	
 	// Credenciales de la api
 	private ArrayList<String> header_accept = new ArrayList<>(List.of("accept", "application/json"));
@@ -142,6 +142,40 @@ public class Api_connector {
 	    }
 
 	    return movies;
+	}
+	
+	public Movie getMovie(int id) {
+		String query = movie_get + id + "?language=es";
+		Movie movie = null;
+		
+		try {
+			HttpRequest request = HttpRequest.newBuilder()
+				    .uri(URI.create(query))
+					.header(this.header_accept.get(0), this.header_accept.get(1))
+					.header(this.header_auth.get(0), this.header_auth.get(1))
+					.method("GET", HttpRequest.BodyPublishers.noBody())
+					.build();
+			
+				HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+				
+				System.out.println(response.body());
+				
+				ObjectMapper mapper = new ObjectMapper();
+		        JsonNode movieNode = mapper.readTree(response.body());
+
+		        int id_movie = movieNode.get("id").asInt();
+		        String title = movieNode.get("title").asText();
+		        boolean adult = movieNode.get("adult").asBoolean();
+		        String lang = movieNode.get("original_language").asText();
+		        String description = movieNode.get("overview").asText();
+		        float popularity = (float) movieNode.get("popularity").asDouble();
+		        String releaseDate = movieNode.has("release_date") ? movieNode.get("release_date").asText() : "0000-00-00";
+	                
+	            movie = new Movie(id_movie, title, adult, lang, description, popularity, releaseDate);
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+		return movie;
 	}
 
 

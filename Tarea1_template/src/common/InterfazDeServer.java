@@ -13,4 +13,7 @@ public interface InterfazDeServer extends Remote {
     public ArrayList<Movie> mostrarFavoritos(String sessionToken) throws RemoteException;
     public ArrayList<Review> mostrarResenasPersonales(String sessionToken) throws RemoteException;
     public Boolean[] editCuenta(String nombre, String surname, String nickname, int id) throws RemoteException;
+    public Movie agregarMovieFav(int id, int movie_id) throws RemoteException;
+    public Review agregarReview(int id, Movie movie, String texto) throws RemoteException;
+    public Movie getMovieByID(int id) throws RemoteException;
 }

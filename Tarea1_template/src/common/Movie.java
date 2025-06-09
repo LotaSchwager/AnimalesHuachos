@@ -19,6 +19,17 @@ public class Movie implements Serializable{
 	private float popularity;
 	private String release_date;
 	
+	public Movie(int id, String nombre, boolean adult, /*ArrayList<Genre> genres,*/ String og_lang, String dscp, float popularity, String release){
+		this.id = id;
+		this.nombre = nombre;
+		this.adult = adult;
+		//this.genres = genres;
+		this.original_lang = og_lang;
+		this.description = dscp;
+		this.popularity = popularity;
+		this.release_date = release;
+	}
+	
 	public Movie(int id, String nombre, boolean adult, ArrayList<Genre> genres, String og_lang, String dscp, float popularity, String release){
 		this.id = id;
 		this.nombre = nombre;

@@ -3,6 +3,7 @@ package client;
 import java.util.List;
 import common.Movie;
 import common.Persona;
+import common.Review;
 
 public class DynamicWindows {
     
@@ -133,9 +134,9 @@ public class DynamicWindows {
             System.out.println("Total de favoritos: " + favoriteMovies.size());
             System.out.println("-----------------------------------------");
             for (Movie movie : favoriteMovies) {
-                System.out.printf("ID: %-4d | %-25s | Año: %d | Pop: %.1f%n",
+                System.out.printf("ID: %-4d | %-20s | Release: %s | Pop: %.1f%n",
                     movie.getId(),
-                    truncateString(movie.getNombre(), 25),
+                    truncateString(movie.getNombre(), 20),
                     movie.getReleaseDate(),
                     movie.getPopularity());
             }
@@ -143,10 +144,33 @@ public class DynamicWindows {
         System.out.println("=========================================");
     }
     
+    // Muestra los resultados de la busqueda
+    public void showReviews(List<Review> reviews, String username) {
+        StaticWindows.getInstance().clearScreen();
+        System.out.println("========== Películas Favoritas ==========");
+        System.out.println("Usuario: @" + username);
+        System.out.println("=========================================");
+        
+        if (reviews.isEmpty()) {
+            System.out.println("No tienes reseñas aún.");
+            System.out.println("Usa 'make review <ID_PELICULA>' para crear una reseña.");
+        } else {
+            System.out.println("Total de reseñas: " + reviews.size());
+            System.out.println("-----------------------------------------");
+            for (Review resena : reviews) {
+                System.out.printf("ID: %-4d | %-20s ",
+                	resena.getID(),
+                    truncateString(resena.getMovieName(), 20));
+                System.out.println("\n" + resena.getReview() + "\n");
+            }
+        }
+        System.out.println("=========================================");
+    }
+    
     // Muestra una confirmacion de reseña
-    public void showReviewConfirmation(String reviewText, int movieId) {
+    public void showReviewConfirmation(String reviewText, String nombre) {
         System.out.println("\n========== Confirmación de Reseña ==========");
-        System.out.println("Película ID: " + movieId);
+        System.out.println("Película: " + nombre);
         System.out.println("Reseña: \"" + reviewText + "\"");
         System.out.println("==========================================");
     }

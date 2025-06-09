@@ -113,6 +113,10 @@ public class Persona implements Serializable {
 	public void setMovies(ArrayList<Movie> movies) {
 		this.movies = movies;
 	}
+	
+	public void addMovie(Movie movie) {
+		this.movies.add(movie);
+	}
 	// ================================================= //
 	
 	// ======================== Reseñas de la persona ================== //
@@ -122,6 +126,10 @@ public class Persona implements Serializable {
 	
 	public void setReview(ArrayList<Review> reviews) {
 		this.reviews = reviews;
+	}
+	
+	public void addReview(Review resena) {
+		this.reviews.add(resena);
 	}
 	// ================================================= //
 	
@@ -144,5 +152,4 @@ public class Persona implements Serializable {
 		this.updatedAt = updatedAt;
 	}
 	// ================================================= //
-	
 }

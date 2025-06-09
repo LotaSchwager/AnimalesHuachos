@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 
 import common.Movie;
 import common.Persona;
+import common.Review;
 
 public class RunClient {
 
@@ -171,7 +172,7 @@ public class RunClient {
         }
     }
 
-    private static void handleMainMenuCommand(Scanner sc, Client client) {
+    private static void handleMainMenuCommand(Scanner sc, Client client) throws RemoteException {
         String fullCommand = sc.nextLine().trim();
         if (fullCommand.isEmpty()) {
             return;
@@ -190,7 +191,7 @@ public class RunClient {
                     } else if (subCommandShow.equals("fav") && argsList.size() == 1) {
                         handleShowFavorites(client);
                     } else if (subCommandShow.equals("review") && argsList.size() == 1) {
-                        dynamicWindows.showPendingFunctionality("show review");
+                    	handleShowReview(client);
                     } else {
                         dynamicWindows.showInvalidCommandUsage("show", "show [user|fav|review]");
                     }
@@ -204,11 +205,21 @@ public class RunClient {
             case "set":
                 if (argsList.size() > 0 && argsList.get(0).equalsIgnoreCase("fav") && argsList.size() == 2) {
                     try {
+                    	// Aqui va lo de favoritos 
                         int movieIdToSet = Integer.parseInt(argsList.get(1));
-                        dynamicWindows.showPendingFunctionality("set fav " + movieIdToSet);
+                        Movie film = client.getMovieFav(loggedInUser.getID(), movieIdToSet);         
+                        if (film == null) {
+                        	dynamicWindows.showErrorMessage("El ID de la película debe existir.");
+                        }else {
+                        	loggedInUser.addMovie(film);
+                            dynamicWindows.showSuccessMessage("Se agrego la pelicula con exito");
+                        }
                     } catch (NumberFormatException e) {
                         dynamicWindows.showErrorMessage("El ID de la película para 'set fav' debe ser un número.");
-                    }
+                    } catch (RemoteException e) {
+                    	dynamicWindows.showErrorMessage("Error: "+ e.toString());
+						e.printStackTrace();
+					}
                 } else {
                     dynamicWindows.showInvalidCommandUsage("set fav", "set fav <ID_PELICULA>");
                 }
@@ -273,11 +284,16 @@ public class RunClient {
     // Manejador de mostrar las peliculas favoritas
     private static void handleShowFavorites(Client client) {
         try {
-            // Assuming you have a method to get favorite movies
-            // List<Movie> favoriteMovies = client.getFavoriteMovies();
-            // For now, using empty list as placeholder
-            List<Movie> favoriteMovies = new ArrayList<>();
-            dynamicWindows.showFavoriteMovies(favoriteMovies, loggedInUser.getNickname());
+            dynamicWindows.showFavoriteMovies(loggedInUser.getMovies(), loggedInUser.getNickname());
+        } catch (Exception e) {
+            dynamicWindows.showErrorMessage("Error al obtener películas favoritas: " + e.getMessage());
+        }
+    }
+    
+    // Manejador de mostrar las peliculas favoritas
+    private static void handleShowReview(Client client) {
+        try {
+            dynamicWindows.showReviews(loggedInUser.getReviews(), loggedInUser.getNickname());
         } catch (Exception e) {
             dynamicWindows.showErrorMessage("Error al obtener películas favoritas: " + e.getMessage());
         }
@@ -397,7 +413,7 @@ public class RunClient {
     }
     
     // Manejador de hacer una reseña
-    private static void handleMakeReview(int movieId, Scanner sc, Client client) {
+    private static void handleMakeReview(int movieId, Scanner sc, Client client) throws RemoteException {
         staticWindows.showMakeReviewHeader(movieId);
         String reviewText = sc.nextLine().trim();
 
@@ -411,8 +427,24 @@ public class RunClient {
             return;
         }
         
-        dynamicWindows.showReviewConfirmation(reviewText, movieId);
-        dynamicWindows.showPendingFunctionality("make review " + movieId);
+        Movie film = client.getMovie(movieId);
+        
+        if (film == null) {
+        	dynamicWindows.showErrorMessage("El id de la pelicula no existe");
+        }
+        else {
+        	dynamicWindows.showReviewConfirmation(reviewText, film.getNombre());
+        	Review resena = client.addReview(loggedInUser.getID(), film, reviewText);
+        	
+        	if(resena == null) {
+        		dynamicWindows.showErrorMessage("La reseña no pudo crearse o ya existe una reseña para esa pelicula.");
+        	}
+        	else {
+        		loggedInUser.addReview(resena);
+        		dynamicWindows.showSuccessMessage("La reseña se creo exitosamente");
+        	}
+        	
+        }
     }
     
     // Mostrar las ventanas de Dynamic o static window

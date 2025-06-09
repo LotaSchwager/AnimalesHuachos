@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import common.InterfazDeServer;
 import common.Movie;
 import common.Persona;
+import common.Review;
 
 public class Client {
 	
@@ -86,11 +87,27 @@ public class Client {
     
     // Llama al metodo para buscar peliculas
     public ArrayList<Movie> buscarPeliculas(String token, String genero, int anio, float rating) throws RemoteException {
-        return server.buscarPeliculas(token, genero, anio, rating);
+    	ArrayList<Movie> lista = new ArrayList<>();
+    	lista = server.buscarPeliculas(token, genero, anio, rating);
+        return lista;
     }
     
     // LLama a editar persona
     public Boolean[] editCuenta(String nombre, String apelldo, String nickname, int id) throws RemoteException {
     	return server.editCuenta(nombre, apelldo, nickname, id);
+    }
+    
+    // Agregar a favoritos, yay.
+    public Movie getMovieFav(int persona_id, int movie_id) throws RemoteException {
+    	return server.agregarMovieFav(persona_id, movie_id);
+    }
+    
+    // obtener pelicula por id
+    public Movie getMovie(int id) throws RemoteException {
+    	return server.getMovieByID(id);
+    }
+    
+    public Review addReview(int id, Movie movie, String texto) throws RemoteException {
+    	return server.agregarReview(id, movie, texto);
     }
 }

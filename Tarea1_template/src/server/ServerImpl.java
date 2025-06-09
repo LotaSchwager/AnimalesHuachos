@@ -180,6 +180,36 @@ public class ServerImpl implements InterfazDeServer {
 		return null;
 	}
 	
+	@Override
+	public Movie agregarMovieFav(int id, int movie_id) throws RemoteException {
+		
+		Movie movie = api.getMovie(movie_id);
+		
+		if (movie == null) {return null;}
+		
+		if(context.addMovieToFavorites(id, movie)) {
+			return movie;
+		}
+		else {
+			return null;
+		}
+	}
+	
+	@Override
+	public Review agregarReview(int id, Movie movie, String texto) throws RemoteException {
+		int review_id = context.addReview(id, movie, texto);
+		if (review_id != -1) {
+			return new Review(review_id, movie.getId(), id, texto, movie.getNombre());
+		}else {
+			return null;
+		} 
+	}
+	
+	@Override
+	public Movie getMovieByID(int id) throws RemoteException {
+		return api.getMovie(id);
+	}
+	
 	// Utilidad
 	private Persona validarTokenSesion(String sessionToken) throws RemoteException {
         if (sessionToken == null || sessionToken == "") {
@@ -219,7 +249,6 @@ public class ServerImpl implements InterfazDeServer {
 	    	    Map.entry("War", "10752"),
 	    	    Map.entry("Western", "37")
 	    	);
-
 
 	    return mapa.getOrDefault(nombre.trim(), ""); // Devuelve "" si no se reconoce el nombre
 	}
